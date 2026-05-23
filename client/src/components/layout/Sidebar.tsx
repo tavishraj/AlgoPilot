@@ -1,145 +1,229 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { NavLink } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard,
-  Code2,
-  Send,
-  Swords,
-  Trophy,
   ChevronLeft,
   ChevronRight,
-  Settings,
-  Sparkles,
+  X,
 } from 'lucide-react';
 import { Logo } from '@/components/common/Logo';
-import { useThemeStore } from '@/stores/useThemeStore';
+import { Button } from '@/components/ui/button';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
+import {
+  accountNavigation,
+  primaryNavigation,
+  type AppNavigationItem,
+} from '@/routes/navigation';
+import { useThemeStore } from '@/stores/useThemeStore';
 
-const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/problems', label: 'Problems', icon: Code2 },
-  { path: '/submissions', label: 'Submissions', icon: Send },
-  { path: '/battle', label: 'Battle', icon: Swords, badge: 'Soon' },
-  { path: '/leaderboard', label: 'Leaderboard', icon: Trophy, badge: 'Soon' },
-];
+export const SIDEBAR_EXPANDED_WIDTH = 252;
+export const SIDEBAR_COLLAPSED_WIDTH = 76;
+const SIDEBAR_MOBILE_WIDTH = 292;
 
-const bottomItems = [
-  { path: '/ai', label: 'AI Assistant', icon: Sparkles, badge: 'Beta' },
-  { path: '/settings', label: 'Settings', icon: Settings },
-];
+interface SidebarProps {
+  mobileOpen: boolean;
+  onMobileClose: () => void;
+}
 
-export function Sidebar() {
+interface SidebarNavItemProps {
+  item: AppNavigationItem;
+  compact: boolean;
+  onNavigate: () => void;
+}
+
+function SidebarNavItem({ item, compact, onNavigate }: SidebarNavItemProps) {
+  return (
+    <NavLink
+      to={item.href}
+      end={item.end}
+      onClick={onNavigate}
+      aria-label={item.label}
+      title={compact ? item.label : undefined}
+      className={({ isActive }) =>
+        cn(
+          'group relative flex h-9 items-center rounded-lg border text-sm font-medium outline-none',
+          'transition-all duration-200 ease-out focus-visible:ring-2 focus-visible:ring-primary/20',
+          compact ? 'justify-center px-0' : 'gap-3 px-3',
+          isActive
+            ? 'border-white/[0.085] bg-white/[0.055] text-text-primary shadow-[0_10px_28px_rgba(0,0,0,0.22)]'
+            : 'border-transparent text-text-tertiary hover:border-white/[0.06] hover:bg-white/[0.04] hover:text-text-primary'
+        )
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {isActive && (
+            <motion.span
+              layoutId="sidebar-active-indicator"
+              className={cn(
+                'absolute top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-primary/75 shadow-[0_0_10px_rgba(103,232,249,0.18)]',
+                compact ? 'left-1' : 'left-1.5'
+              )}
+              transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+            />
+          )}
+
+          <span
+            className={cn(
+              'relative grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors duration-200',
+              isActive
+                ? 'bg-primary/[0.075] text-primary/90'
+                : 'text-inherit group-hover:bg-surface'
+            )}
+          >
+            <item.icon className="h-4 w-4" />
+          </span>
+
+          <AnimatePresence initial={false}>
+            {!compact && (
+              <motion.span
+                initial={{ opacity: 0, x: -4 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -4 }}
+                transition={{ duration: 0.16 }}
+                className="min-w-0 flex-1 truncate"
+              >
+                {item.label}
+              </motion.span>
+            )}
+          </AnimatePresence>
+
+          {compact && (
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute left-[calc(100%+12px)] top-1/2 z-50 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-border bg-popover/95 px-2.5 py-1.5 text-xs text-text-secondary opacity-0 shadow-xl backdrop-blur-xl transition-opacity duration-150 group-hover:opacity-100 md:block"
+            >
+              {item.label}
+            </span>
+          )}
+        </>
+      )}
+    </NavLink>
+  );
+}
+
+export function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const { sidebarCollapsed, toggleSidebar } = useThemeStore();
+  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const compact = isDesktop && sidebarCollapsed;
+  const sidebarWidth = isDesktop
+    ? sidebarCollapsed
+      ? SIDEBAR_COLLAPSED_WIDTH
+      : SIDEBAR_EXPANDED_WIDTH
+    : SIDEBAR_MOBILE_WIDTH;
 
   return (
     <motion.aside
       initial={false}
-      animate={{ width: sidebarCollapsed ? 68 : 240 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      animate={{
+        width: sidebarWidth,
+        x: isDesktop || mobileOpen ? 0 : -SIDEBAR_MOBILE_WIDTH,
+      }}
+      transition={{ type: 'spring', stiffness: 360, damping: 34 }}
       className={cn(
-        'fixed left-0 top-0 z-40 h-screen flex flex-col',
-        'border-r border-border bg-background-secondary'
+        'fixed inset-y-0 left-0 z-50 flex h-dvh flex-col overflow-visible',
+        'border-r border-sidebar-border/75 bg-[linear-gradient(180deg,rgba(14,16,20,0.93),rgba(8,9,11,0.88))]',
+        'shadow-[14px_0_48px_rgba(0,0,0,0.3)] backdrop-blur-2xl'
       )}
     >
-      {/* Header */}
-      <div className="flex h-14 items-center justify-between px-4 border-b border-border/50">
-        <Logo collapsed={sidebarCollapsed} />
-        <button
+      <div
+        className={cn(
+          'flex h-16 shrink-0 items-center justify-between border-b border-white/[0.055]',
+          compact ? 'px-2' : 'px-4'
+        )}
+      >
+        <Logo collapsed={compact} />
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="hidden border border-transparent text-text-tertiary hover:border-white/[0.08] hover:bg-white/[0.045] hover:text-text-primary md:inline-flex"
           onClick={toggleSidebar}
-          className={cn(
-            'flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)]',
-            'text-text-tertiary hover:text-text-secondary hover:bg-surface',
-            'transition-colors duration-200',
-            sidebarCollapsed && 'mx-auto'
-          )}
+          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {sidebarCollapsed ? (
-            <ChevronRight className="h-3.5 w-3.5" />
+            <ChevronRight className="h-4 w-4" />
           ) : (
-            <ChevronLeft className="h-3.5 w-3.5" />
+            <ChevronLeft className="h-4 w-4" />
           )}
-        </button>
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="border border-transparent text-text-tertiary hover:border-white/[0.08] hover:bg-white/[0.045] hover:text-text-primary md:hidden"
+          onClick={onMobileClose}
+          aria-label="Close navigation"
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Nav Links */}
-      <nav className="flex-1 overflow-y-auto py-3 px-2.5">
-        <div className="space-y-0.5">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              className={({ isActive }) =>
-                cn(
-                  'group flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2',
-                  'text-sm font-medium transition-all duration-200',
-                  isActive
-                    ? 'bg-accent/10 text-accent'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-                )
-              }
-            >
-              <item.icon className="h-4 w-4 flex-shrink-0" />
-              <AnimatePresence mode="wait">
-                {!sidebarCollapsed && (
-                  <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.15 }}
-                    className="truncate"
-                  >
-                    {item.label}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-              {!sidebarCollapsed && item.badge && (
-                <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-[var(--radius-full)] bg-accent/10 text-accent">
-                  {item.badge}
-                </span>
-              )}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
-
-      {/* Bottom */}
-      <div className="border-t border-border/50 py-3 px-2.5 space-y-0.5">
-        {bottomItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) =>
-              cn(
-                'group flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2',
-                'text-sm font-medium transition-all duration-200',
-                isActive
-                  ? 'bg-accent/10 text-accent'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
-              )
-            }
-          >
-            <item.icon className="h-4 w-4 flex-shrink-0" />
-            <AnimatePresence mode="wait">
-              {!sidebarCollapsed && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: 'auto' }}
-                  exit={{ opacity: 0, width: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="truncate"
-                >
-                  {item.label}
-                </motion.span>
-              )}
-            </AnimatePresence>
-            {!sidebarCollapsed && item.badge && (
-              <span className="ml-auto text-[10px] font-medium px-1.5 py-0.5 rounded-[var(--radius-full)] bg-accent/10 text-accent">
-                {item.badge}
-              </span>
+      <div className="flex min-h-0 flex-1 flex-col gap-5 px-3 py-4">
+        <nav className="space-y-1.5" aria-label="Primary navigation">
+          <p
+            className={cn(
+              'px-2 pb-1 text-[10px] font-medium uppercase tracking-[0.16em] text-text-muted',
+              compact && 'sr-only'
             )}
-          </NavLink>
-        ))}
+          >
+            Main
+          </p>
+          {primaryNavigation.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              item={item}
+              compact={compact}
+              onNavigate={onMobileClose}
+            />
+          ))}
+        </nav>
+
+        <div className="mt-auto space-y-4">
+          <nav className="space-y-1.5" aria-label="Account navigation">
+            <p
+              className={cn(
+                'px-2 pb-1 text-[10px] font-medium uppercase tracking-[0.16em] text-text-muted',
+                compact && 'sr-only'
+              )}
+            >
+              Account
+            </p>
+            {accountNavigation.map((item) => (
+              <SidebarNavItem
+                key={item.href}
+                item={item}
+                compact={compact}
+                onNavigate={onMobileClose}
+              />
+            ))}
+          </nav>
+
+          <div
+            className={cn(
+              'rounded-xl border border-white/[0.07] bg-white/[0.035] p-3 shadow-[0_12px_30px_rgba(0,0,0,0.18)]',
+              compact && 'flex justify-center p-2'
+            )}
+          >
+            {compact ? (
+              <span className="h-2 w-2 rounded-full bg-primary/75 shadow-[0_0_10px_rgba(103,232,249,0.2)]" />
+            ) : (
+              <div className="flex items-center gap-3">
+                <span className="h-2 w-2 rounded-full bg-primary/75 shadow-[0_0_10px_rgba(103,232,249,0.2)]" />
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-medium text-text-secondary">
+                    AI systems ready
+                  </p>
+                  <p className="truncate text-[11px] text-text-muted">
+                    Low-latency guidance active
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </motion.aside>
   );

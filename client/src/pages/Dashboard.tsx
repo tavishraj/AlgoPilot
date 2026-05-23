@@ -1,57 +1,154 @@
 import { motion } from 'framer-motion';
 import {
-  Code2,
-  Flame,
-  Trophy,
-  Target,
-  TrendingUp,
+  Activity,
   ArrowRight,
-  Zap,
-  Clock,
+  Bookmark,
+  CalendarDays,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  Code2,
+  LineChart,
+  Play,
+  Target,
+  Trophy,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatedPage } from '@/components/common/AnimatedPage';
-import { GlassCard } from '@/components/common/GlassCard';
+import { DashboardCard } from '@/components/features/dashboard';
 import { DifficultyBadge } from '@/components/features/problems/DifficultyBadge';
 import { cn } from '@/lib/utils';
+import { ROUTE_PATHS } from '@/routes/paths';
 
-// ─── Mock Data (replace with React Query hooks) ──────────
-const stats = [
-  { label: 'Problems Solved', value: '127', icon: Code2, trend: '+12 this week', color: 'text-accent' },
-  { label: 'Current Streak', value: '14', icon: Flame, trend: '🔥 Personal best!', color: 'text-warning' },
-  { label: 'Global Rank', value: '#342', icon: Trophy, trend: 'Top 5%', color: 'text-success' },
-  { label: 'Rating', value: '1,847', icon: TrendingUp, trend: '+23 this month', color: 'text-accent' },
+const overviewStats = [
+  {
+    label: 'Daily streak',
+    value: '14 days',
+    detail: 'Checked in before noon',
+    icon: CalendarDays,
+  },
+  {
+    label: 'XP this week',
+    value: '2,840',
+    detail: '+18% from last week',
+    icon: LineChart,
+  },
+  {
+    label: 'Current rank',
+    value: '#342',
+    detail: 'Top 5% consistency',
+    icon: Trophy,
+  },
 ];
 
-const recentProblems = [
-  { id: '1', title: 'Two Sum', difficulty: 'EASY' as const, status: 'solved', time: '2h ago' },
-  { id: '2', title: 'Merge K Sorted Lists', difficulty: 'HARD' as const, status: 'attempted', time: '5h ago' },
-  { id: '3', title: 'LRU Cache', difficulty: 'MEDIUM' as const, status: 'solved', time: '1d ago' },
-  { id: '4', title: 'Valid Parentheses', difficulty: 'EASY' as const, status: 'solved', time: '1d ago' },
-  { id: '5', title: 'Binary Tree Level Order', difficulty: 'MEDIUM' as const, status: 'attempted', time: '2d ago' },
+const practiceQueue = [
+  {
+    title: 'LRU Cache',
+    topic: 'Hash map + linked list',
+    difficulty: 'MEDIUM' as const,
+    progress: 72,
+    estimate: '18 min',
+  },
+  {
+    title: 'Binary Tree Level Order',
+    topic: 'Trees and BFS',
+    difficulty: 'MEDIUM' as const,
+    progress: 44,
+    estimate: '22 min',
+  },
 ];
 
-const quickActions = [
-  { label: 'Random Problem', icon: Target, description: 'Challenge yourself', accent: true },
-  { label: 'Daily Challenge', icon: Zap, description: 'Today\'s problem', accent: false },
-  { label: 'Continue Learning', icon: Clock, description: 'Pick up where you left off', accent: false },
+const recentActivity = [
+  {
+    title: 'Two Sum',
+    difficulty: 'EASY' as const,
+    status: 'Accepted',
+    time: '2h ago',
+  },
+  {
+    title: 'Merge K Sorted Lists',
+    difficulty: 'HARD' as const,
+    status: 'Reviewed',
+    time: '5h ago',
+  },
+  {
+    title: 'Valid Parentheses',
+    difficulty: 'EASY' as const,
+    status: 'Accepted',
+    time: 'Yesterday',
+  },
+  {
+    title: 'Longest Substring Without Repeating Characters',
+    difficulty: 'MEDIUM' as const,
+    status: 'Revisited',
+    time: '2d ago',
+  },
 ];
 
-// ─── Stagger Animation Config ────────────────────────────
+const wishlistProblems = [
+  {
+    title: 'Design Twitter',
+    topic: 'System design warmup',
+    difficulty: 'MEDIUM' as const,
+  },
+  {
+    title: 'Word Ladder',
+    topic: 'Graph shortest path',
+    difficulty: 'HARD' as const,
+  },
+  {
+    title: 'Median of Two Sorted Arrays',
+    topic: 'Binary search',
+    difficulty: 'HARD' as const,
+  },
+];
+
+const heatmapLevels = [
+  'bg-white/[0.04]',
+  'bg-primary/[0.12]',
+  'bg-primary/[0.22]',
+  'bg-primary/[0.34]',
+  'bg-primary/[0.48]',
+];
+
+const heatmapCells = Array.from({ length: 84 }, (_, index) => {
+  const pattern = [0, 1, 0, 2, 3, 1, 0, 2, 4, 1, 0, 3];
+  return pattern[index % pattern.length];
+});
+
 const containerVariants = {
   animate: {
-    transition: { staggerChildren: 0.08 },
+    transition: { staggerChildren: 0.055 },
   },
 };
 
 const itemVariants = {
-  initial: { opacity: 0, y: 16 },
+  initial: { opacity: 0, y: 10 },
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const },
+    transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
+
+function SectionAction({
+  children,
+  onClick,
+}: {
+  children: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-text-tertiary transition-colors duration-200 hover:bg-white/[0.045] hover:text-text-primary"
+    >
+      {children}
+      <ArrowRight className="size-3.5" />
+    </button>
+  );
+}
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -62,149 +159,296 @@ export function DashboardPage() {
         variants={containerVariants}
         initial="initial"
         animate="animate"
-        className="space-y-6 max-w-6xl"
+        className="mx-auto flex w-full max-w-[1320px] flex-col gap-5"
       >
-        {/* ─── Header ────────────────────────────────── */}
-        <motion.div variants={itemVariants}>
-          <h1 className="text-2xl font-bold text-text-primary">
-            Welcome back<span className="text-accent">.</span>
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Keep your streak alive — solve today's challenge.
-          </p>
-        </motion.div>
+        <motion.div
+          variants={itemVariants}
+          className="rounded-2xl border border-white/[0.07] bg-white/[0.025] px-5 py-5 shadow-[0_18px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl sm:px-6"
+        >
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-text-tertiary">
+                <span className="size-1.5 rounded-full bg-primary/80 shadow-[0_0_10px_rgba(103,232,249,0.22)]" />
+                Focus workspace
+              </div>
+              <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
+                Welcome back to AlgoPilot.
+              </h1>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-text-secondary">
+                Your practice plan, streak, and saved problems are organized for
+                a calm daily coding session.
+              </p>
+            </div>
 
-        {/* ─── Stat Cards ────────────────────────────── */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {stats.map((stat) => (
-            <GlassCard key={stat.label} hover glow className="relative overflow-hidden">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs font-medium text-text-tertiary uppercase tracking-wider">
-                    {stat.label}
-                  </p>
-                  <p className={cn('mt-1.5 text-2xl font-bold', stat.color)}>
+            <div className="grid grid-cols-3 gap-2 rounded-xl border border-white/[0.07] bg-black/15 p-1.5 sm:min-w-[360px]">
+              {overviewStats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-lg px-3 py-2.5 transition-colors duration-200 hover:bg-white/[0.035]"
+                >
+                  <div className="mb-2 flex items-center gap-2 text-text-muted">
+                    <stat.icon className="size-3.5" />
+                    <span className="truncate text-[11px] font-medium uppercase tracking-[0.12em]">
+                      {stat.label}
+                    </span>
+                  </div>
+                  <p className="truncate text-lg font-semibold text-text-primary">
                     {stat.value}
                   </p>
-                  <p className="mt-1 text-xs text-text-secondary">{stat.trend}</p>
+                  <p className="mt-0.5 truncate text-[11px] text-text-muted">
+                    {stat.detail}
+                  </p>
                 </div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] bg-surface">
-                  <stat.icon className={cn('h-4 w-4', stat.color)} />
-                </div>
-              </div>
-              {/* Subtle gradient accent */}
-              <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-accent/5 blur-2xl" />
-            </GlassCard>
-          ))}
+              ))}
+            </div>
+          </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* ─── Recent Activity ──────────────────────── */}
-          <motion.div variants={itemVariants} className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-text-primary">Recent Activity</h2>
-              <button
-                onClick={() => navigate('/problems')}
-                className="flex items-center gap-1 text-xs text-text-tertiary hover:text-accent transition-colors"
+        <motion.div
+          variants={itemVariants}
+          className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.9fr)]"
+        >
+          <div className="grid min-w-0 gap-5">
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+              <DashboardCard
+                eyebrow="Daily streak"
+                title="Consistency"
+                icon={<CalendarDays className="size-4" />}
+                contentClassName="space-y-5"
               >
-                View all <ArrowRight className="h-3 w-3" />
-              </button>
+                <div className="flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-4xl font-semibold tracking-tight text-text-primary">
+                      14
+                    </p>
+                    <p className="mt-1 text-sm text-text-secondary">
+                      days in a row
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-primary/10 bg-primary/[0.055] px-3 py-2 text-right">
+                    <p className="text-xs text-text-tertiary">Today</p>
+                    <p className="text-sm font-medium text-primary/90">
+                      Completed
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1.5">
+                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+                    <div key={`${day}-${index}`} className="text-center">
+                      <div
+                        className={cn(
+                          'mb-1.5 grid aspect-square place-items-center rounded-lg border text-xs font-medium',
+                          index < 6
+                            ? 'border-primary/10 bg-primary/[0.12] text-primary/90'
+                            : 'border-white/[0.08] bg-white/[0.035] text-text-muted'
+                        )}
+                      >
+                        {index < 6 ? <CheckCircle2 className="size-3.5" /> : day}
+                      </div>
+                      <span className="text-[11px] text-text-muted">{day}</span>
+                    </div>
+                  ))}
+                </div>
+              </DashboardCard>
+
+              <DashboardCard
+                eyebrow="XP and rank"
+                title="Progress profile"
+                icon={<LineChart className="size-4" />}
+                contentClassName="space-y-5"
+              >
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.14em] text-text-muted">
+                      XP earned
+                    </p>
+                    <p className="mt-2 text-3xl font-semibold tracking-tight text-text-primary">
+                      12,480
+                    </p>
+                    <p className="mt-1 text-sm text-text-tertiary">
+                      840 XP to next rank
+                    </p>
+                  </div>
+                  <div className="sm:border-l sm:border-white/[0.07] sm:pl-5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-text-tertiary">Rank</span>
+                      <span className="text-sm font-semibold text-text-primary">
+                        #342
+                      </span>
+                    </div>
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/[0.055]">
+                      <div className="h-full w-[68%] rounded-full bg-primary/70 shadow-[0_0_18px_rgba(103,232,249,0.16)]" />
+                    </div>
+                    <p className="mt-3 text-xs leading-5 text-text-muted">
+                      Top 5% among active learners this month.
+                    </p>
+                  </div>
+                </div>
+              </DashboardCard>
             </div>
-            <div className="space-y-1.5">
-              {recentProblems.map((problem, i) => (
-                <motion.div
-                  key={problem.id}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.06 }}
-                  className={cn(
-                    'group flex items-center justify-between rounded-[var(--radius-md)] border border-border/50 p-3',
-                    'bg-surface/30 hover:bg-surface-hover hover:border-border-hover',
-                    'cursor-pointer transition-all duration-200'
-                  )}
+
+            <DashboardCard
+              eyebrow="Continue practicing"
+              title="Recommended queue"
+              icon={<Play className="size-4" />}
+              action={
+                <SectionAction onClick={() => navigate(ROUTE_PATHS.practice)}>
+                  Open practice
+                </SectionAction>
+              }
+              contentClassName="space-y-3"
+            >
+              {practiceQueue.map((problem) => (
+                <button
+                  key={problem.title}
+                  type="button"
+                  onClick={() => navigate(ROUTE_PATHS.practice)}
+                  className="group flex w-full flex-col gap-3 rounded-xl p-3 text-left transition-colors duration-200 hover:bg-white/[0.04] sm:flex-row sm:items-center"
                 >
-                  <div className="flex items-center gap-3">
-                    <div
+                  <div className="grid size-10 shrink-0 place-items-center rounded-lg border border-white/[0.07] bg-black/15 text-text-secondary group-hover:text-text-primary">
+                    <Code2 className="size-4" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="truncate text-sm font-semibold text-text-primary">
+                        {problem.title}
+                      </h3>
+                      <DifficultyBadge difficulty={problem.difficulty} />
+                    </div>
+                    <p className="mt-1 text-sm text-text-tertiary">
+                      {problem.topic}
+                    </p>
+                    <div className="mt-3 flex items-center gap-3">
+                      <div className="h-1.5 min-w-[120px] flex-1 overflow-hidden rounded-full bg-white/[0.055]">
+                        <div
+                          className="h-full rounded-full bg-primary/65"
+                          style={{ width: `${problem.progress}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-text-muted">
+                        {problem.progress}%
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-text-muted sm:justify-end">
+                    <Clock3 className="size-3.5" />
+                    {problem.estimate}
+                    <ChevronRight className="size-4 text-text-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-text-secondary" />
+                  </div>
+                </button>
+              ))}
+            </DashboardCard>
+
+            <DashboardCard
+              eyebrow="Activity map"
+              title="Practice heatmap"
+              icon={<Activity className="size-4" />}
+              contentClassName="space-y-4"
+            >
+              <div className="dashboard-heatmap-grid">
+                {heatmapCells.map((level, index) => (
+                  <span
+                    key={index}
+                    className={cn(
+                      'aspect-square rounded-[5px] border border-white/[0.045] transition-colors duration-200 hover:border-primary/25',
+                      heatmapLevels[level]
+                    )}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center justify-between gap-3 text-xs text-text-muted">
+                <span>12 weeks of placeholder activity</span>
+                <div className="flex items-center gap-1.5">
+                  <span>Less</span>
+                  {heatmapLevels.map((level) => (
+                    <span
+                      key={level}
                       className={cn(
-                        'h-2 w-2 rounded-full flex-shrink-0',
-                        problem.status === 'solved' ? 'bg-success' : 'bg-warning'
+                        'size-2.5 rounded-[4px] border border-white/[0.045]',
+                        level
                       )}
                     />
-                    <span className="text-sm font-medium text-text-primary group-hover:text-accent transition-colors">
-                      {problem.title}
-                    </span>
-                    <DifficultyBadge difficulty={problem.difficulty} />
-                  </div>
-                  <span className="text-xs text-text-muted">{problem.time}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ─── Quick Actions ────────────────────────── */}
-          <motion.div variants={itemVariants}>
-            <h2 className="text-sm font-semibold text-text-primary mb-3">Quick Actions</h2>
-            <div className="space-y-2">
-              {quickActions.map((action) => (
-                <GlassCard
-                  key={action.label}
-                  hover
-                  glow={action.accent}
-                  className={cn(
-                    'flex items-center gap-3 !p-3.5',
-                    action.accent && 'border-accent/20'
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)]',
-                      action.accent ? 'gradient-accent' : 'bg-surface'
-                    )}
-                  >
-                    <action.icon
-                      className={cn('h-4 w-4', action.accent ? 'text-white' : 'text-text-secondary')}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">{action.label}</p>
-                    <p className="text-xs text-text-tertiary">{action.description}</p>
-                  </div>
-                </GlassCard>
-              ))}
-            </div>
-
-            {/* ─── Progress Ring ──────────────────────── */}
-            <GlassCard className="mt-3 text-center !py-6" hover={false}>
-              <div className="relative mx-auto h-24 w-24">
-                <svg className="h-24 w-24 -rotate-90" viewBox="0 0 100 100">
-                  <circle
-                    cx="50" cy="50" r="42"
-                    fill="none"
-                    stroke="var(--color-border)"
-                    strokeWidth="6"
-                  />
-                  <circle
-                    cx="50" cy="50" r="42"
-                    fill="none"
-                    stroke="var(--color-accent)"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 42}`}
-                    strokeDashoffset={`${2 * Math.PI * 42 * (1 - 0.68)}`}
-                    className="transition-all duration-1000"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-accent">68%</span>
-                  <span className="text-[10px] text-text-tertiary">Weekly Goal</span>
+                  ))}
+                  <span>More</span>
                 </div>
               </div>
-              <p className="mt-3 text-xs text-text-secondary">
-                Solve <span className="text-accent font-medium">4 more</span> to reach your goal
-              </p>
-            </GlassCard>
-          </motion.div>
-        </div>
+            </DashboardCard>
+          </div>
+
+          <aside className="grid min-w-0 gap-5 xl:auto-rows-min">
+            <DashboardCard
+              eyebrow="Recent activity"
+              title="Latest work"
+              icon={<Target className="size-4" />}
+              action={
+                <SectionAction onClick={() => navigate(ROUTE_PATHS.practice)}>
+                  View all
+                </SectionAction>
+              }
+              contentClassName="space-y-2"
+            >
+              {recentActivity.map((activity) => (
+                <div
+                  key={`${activity.title}-${activity.time}`}
+                  className="flex items-center gap-3 rounded-lg px-1.5 py-2.5 transition-colors duration-200 hover:bg-white/[0.035]"
+                >
+                  <span className="size-2 rounded-full bg-primary/70 shadow-[0_0_12px_rgba(103,232,249,0.12)]" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <p className="truncate text-sm font-medium text-text-primary">
+                        {activity.title}
+                      </p>
+                      <DifficultyBadge
+                        difficulty={activity.difficulty}
+                        className="hidden sm:inline-flex"
+                      />
+                    </div>
+                    <p className="mt-0.5 text-xs text-text-muted">
+                      {activity.status} · {activity.time}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </DashboardCard>
+
+            <DashboardCard
+              eyebrow="Wishlist problems"
+              title="Saved for later"
+              icon={<Bookmark className="size-4" />}
+              action={
+                <SectionAction onClick={() => navigate(ROUTE_PATHS.practice)}>
+                  Manage
+                </SectionAction>
+              }
+              contentClassName="space-y-3"
+            >
+              {wishlistProblems.map((problem) => (
+                <button
+                  key={problem.title}
+                  type="button"
+                  onClick={() => navigate(ROUTE_PATHS.practice)}
+                  className="group flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors duration-200 hover:bg-white/[0.04]"
+                >
+                  <div className="grid size-8 shrink-0 place-items-center rounded-lg border border-white/[0.07] bg-black/15 text-text-tertiary group-hover:text-text-primary">
+                    <Bookmark className="size-3.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-text-primary">
+                      {problem.title}
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-text-muted">
+                      {problem.topic}
+                    </p>
+                  </div>
+                  <DifficultyBadge difficulty={problem.difficulty} />
+                </button>
+              ))}
+            </DashboardCard>
+          </aside>
+        </motion.div>
       </motion.div>
     </AnimatedPage>
   );

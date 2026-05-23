@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { AnimatedPage } from '@/components/common/AnimatedPage';
 import { ProblemList } from '@/components/features/problems/ProblemList';
+import { ROUTE_PATHS } from '@/routes/paths';
 import type { ProblemSummary } from '@/types/problem';
 
 // ─── Mock Data (replace with useProblems() React Query hook) ──
@@ -114,15 +115,15 @@ export function ProblemsPage() {
     <AnimatedPage>
       <div className="max-w-4xl">
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-text-primary">Problems</h1>
+          <h1 className="text-xl font-bold text-text-primary">Practice with AI</h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Practice DSA problems — filter by difficulty or search by topic.
+            Practice DSA problems with focused AI support, topic filters, and review-ready problem sets.
           </p>
         </div>
 
         <ProblemList
           problems={mockProblems}
-          onProblemClick={(slug) => navigate(`/problems/${slug}`)}
+          onProblemClick={(slug) => navigate(ROUTE_PATHS.practiceProblem(slug))}
         />
       </div>
     </AnimatedPage>

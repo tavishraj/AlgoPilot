@@ -19,14 +19,6 @@ export const LANGUAGES = [
   { value: 'cpp', label: 'C++', icon: 'C+' },
 ] as const;
 
-export const NAV_ITEMS = [
-  { path: '/', label: 'Dashboard', icon: 'LayoutDashboard' },
-  { path: '/problems', label: 'Problems', icon: 'Code2' },
-  { path: '/submissions', label: 'Submissions', icon: 'Send' },
-  { path: '/battle', label: 'Battle', icon: 'Swords', badge: 'Soon' },
-  { path: '/leaderboard', label: 'Leaderboard', icon: 'Trophy', badge: 'Soon' },
-] as const;
-
 export const SUBMISSION_STATUS_MAP = {
   PENDING: { label: 'Pending', color: 'text-text-secondary' },
   ACCEPTED: { label: 'Accepted', color: 'text-success' },
