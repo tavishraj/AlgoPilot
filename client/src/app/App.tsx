@@ -1,11 +1,9 @@
-import { RouterProvider } from 'react-router-dom';
-import { Providers } from './Providers';
-import { router } from './router';
-
-export function App() {
+function App() {
   return (
-    <Providers>
-      <RouterProvider router={router} />
-    </Providers>
-  );
+    <div className="h-screen bg-black text-white flex items-center justify-center text-4xl font-bold">
+      AlgoPilot
+    </div>
+  )
 }
+
+export default App

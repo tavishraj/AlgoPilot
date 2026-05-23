@@ -29,5 +29,8 @@
     "react-router-dom": "^7.15.1",
     "tailwindcss": "^4.3.0",
     "zustand": "^5.0.13"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
