@@ -1,0 +1,140 @@
+// ─── AlgoPilot Prisma Schema ──────────────────────────────
+// Datasource: PostgreSQL
+// Generator: Prisma Client
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// ─── Models ───────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  avatarUrl    String?
+  role         Role     @default(USER)
+
+  // Stats
+  rank        Int      @default(0)
+  streak      Int      @default(0)
+  solvedCount Int      @default(0)
+  rating      Int      @default(1200)
+
+  // Relations
+  submissions Submission[]
+  sessions    Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([username])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@map("sessions")
+}
+
+model Problem {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String     @db.Text
+  difficulty  Difficulty
+  tags        String[]
+  constraints String?    @db.Text
+  examples    Json       // Array of { input, output, explanation }
+  starterCode Json       // { javascript: "...", python: "...", ... }
+  testCases   Json       // Array of { input, expectedOutput, isHidden }
+
+  // Stats
+  acceptanceRate Float   @default(0)
+  totalAttempts  Int     @default(0)
+
+  // Relations
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([difficulty])
+  @@map("problems")
+}
+
+model Submission {
+  id        String           @id @default(cuid())
+  userId    String
+  problemId String
+  code      String           @db.Text
+  language  String
+  status    SubmissionStatus @default(PENDING)
+  runtime   Int?             // milliseconds
+  memory    Int?             // kilobytes
+  output    String?          @db.Text
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([status])
+  @@map("submissions")
+}
+
+// ─── Future Models (uncomment when needed) ────────────────
+
+// model Battle {
+//   id          String   @id @default(cuid())
+//   problemId   String
+//   player1Id   String
+//   player2Id   String
+//   winnerId    String?
+//   status      String   @default("WAITING") // WAITING, IN_PROGRESS, COMPLETED
+//   startedAt   DateTime?
+//   endedAt     DateTime?
+//   createdAt   DateTime @default(now())
+//   @@map("battles")
+// }

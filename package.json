@@ -1,0 +1,33 @@
+{
+  "name": "algopilot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AlgoPilot — AI-powered DSA platform",
+  "scripts": {
+    "dev": "concurrently -n client,server -c cyan,magenta \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "install:all": "cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build",
+    "typecheck": "cd client && npx tsc --noEmit && cd ../server && npx tsc --noEmit",
+    "db:generate": "cd server && npx prisma generate",
+    "db:migrate": "cd server && npx prisma migrate dev",
+    "db:studio": "cd server && npx prisma studio"
+  },
+  "keywords": [
+    "algopilot",
+    "dsa",
+    "algorithms",
+    "ai"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@tanstack/react-query": "^5.100.13",
+    "framer-motion": "^12.40.0",
+    "lucide-react": "^1.16.0",
+    "react-router-dom": "^7.15.1",
+    "tailwindcss": "^4.3.0",
+    "zustand": "^5.0.13"
+  }
+}
