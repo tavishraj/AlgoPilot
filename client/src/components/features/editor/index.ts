@@ -1,5 +1,4 @@
-// ─── Future: Editor Components ────────────────────────────
-// - CodeEditor.tsx (Monaco Editor wrapper)
-// - EditorToolbar.tsx (language selector, theme, run button)
-// - TestRunner.tsx (test case runner panel)
-export {};
+// ─── Editor Components ────────────────────────────────────
+export { CodeEditor } from './CodeEditor';
+export { EditorToolbar } from './EditorToolbar';
+export { EditorPanel } from './EditorPanel';

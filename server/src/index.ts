@@ -1,5 +1,6 @@
 import app from './app.js';
 import { env } from './config/env.js';
+import { aiConfig } from './config/ai.config.js';
 import { logger } from './lib/logger.js';
 
 // ─── Future: WebSocket Setup ─────────────────────────────
@@ -12,6 +13,9 @@ const server = app.listen(env.PORT, () => {
   logger.info(`🚀 AlgoPilot API running on port ${env.PORT}`);
   logger.info(`📦 Environment: ${env.NODE_ENV}`);
   logger.info(`🔗 Health: http://localhost:${env.PORT}/api/health`);
+  logger.info(`🤖 AI Provider: ${aiConfig.provider.name}`);
+  logger.info(`🧠 AI Model: ${aiConfig.provider.model}`);
+  logger.info(`🔑 API Key: ${aiConfig.provider.headers['Authorization'] ? 'configured' : '❌ MISSING'}`);
 });
 
 // ─── Graceful Shutdown ───────────────────────────────────

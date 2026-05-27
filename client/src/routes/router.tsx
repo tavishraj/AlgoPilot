@@ -1,20 +1,35 @@
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
+import { Suspense } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ROUTE_PATHS } from './paths';
+import { RouteFallback } from '@/components/layout/RouteFallback';
 import {
   BattlesRoute,
+  CodingWorkspaceRoute,
   DashboardRoute,
   LeaderboardRoute,
   NotFoundRoute,
-  PracticeProblemRoute,
   PracticeRoute,
   ProfileRoute,
   SettingsRoute,
 } from './routeElements';
 
 export const appRoutes: RouteObject[] = [
+  // ─── Workspace Route (full viewport, no sidebar) ──────
+  {
+    path: 'practice/:slug',
+    element: (
+      <ProtectedRoute>
+        <Suspense fallback={<RouteFallback />}>
+          <CodingWorkspaceRoute />
+        </Suspense>
+      </ProtectedRoute>
+    ),
+  },
+
+  // ─── Main App Layout (with sidebar) ───────────────────
   {
     path: ROUTE_PATHS.home,
     element: (
@@ -34,10 +49,6 @@ export const appRoutes: RouteObject[] = [
       {
         path: 'practice',
         element: <PracticeRoute />,
-      },
-      {
-        path: 'practice/:slug',
-        element: <PracticeProblemRoute />,
       },
       {
         path: 'battles',

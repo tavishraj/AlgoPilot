@@ -12,7 +12,7 @@ export const PracticeRoute = lazy(() =>
   }))
 );
 
-export const PracticeProblemRoute = lazy(() => import('@/pages/PracticeProblem'));
+export const CodingWorkspaceRoute = lazy(() => import('@/pages/CodingWorkspace'));
 export const BattlesRoute = lazy(() => import('@/pages/Battles'));
 export const LeaderboardRoute = lazy(() => import('@/pages/Leaderboard'));
 export const ProfileRoute = lazy(() => import('@/pages/Profile'));

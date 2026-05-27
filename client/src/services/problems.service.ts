@@ -1,5 +1,5 @@
 import api from './api';
-import type { ProblemSummary, Problem, Difficulty } from '@/types/problem';
+import type { Problem, ProblemSummary, Difficulty } from '@/types/problem';
 import type { PaginatedResponse, ApiResponse } from '@/types/api';
 
 export interface ProblemsQueryParams {

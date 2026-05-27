@@ -1,0 +1,24 @@
+[
+  {
+    "lang": "java",
+    "missing": [
+      "recursion",
+      "stack (push/pop pattern)"
+    ],
+    "extra": [
+      "queue",
+      "stack"
+    ]
+  },
+  {
+    "lang": "cpp",
+    "missing": [
+      "recursion",
+      "stack (push/pop pattern)"
+    ],
+    "extra": [
+      "queue",
+      "stack"
+    ]
+  }
+]

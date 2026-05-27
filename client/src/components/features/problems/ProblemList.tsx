@@ -1,28 +1,42 @@
-import { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Search, Filter, Tag } from 'lucide-react';
 import { ProblemCard } from './ProblemCard';
 import { EmptyState } from '@/components/common/EmptyState';
 import { cn } from '@/lib/utils';
-import type { ProblemSummary, Difficulty } from '@/types/problem';
+import type { ProblemSummary, Difficulty, ProblemTag } from '@/types/problem';
 
 interface ProblemListProps {
   problems: ProblemSummary[];
+  availableTags?: string[];
   isLoading?: boolean;
   onProblemClick?: (slug: string) => void;
 }
 
 const difficulties: (Difficulty | 'ALL')[] = ['ALL', 'EASY', 'MEDIUM', 'HARD'];
 
-export function ProblemList({ problems, isLoading, onProblemClick }: ProblemListProps) {
+export function ProblemList({ problems, availableTags = [], isLoading, onProblemClick }: ProblemListProps) {
   const [search, setSearch] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | 'ALL'>('ALL');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const filtered = problems.filter((p) => {
-    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) ||
-      p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
-    const matchesDifficulty = selectedDifficulty === 'ALL' || p.difficulty === selectedDifficulty;
-    return matchesSearch && matchesDifficulty;
-  });
+  const filtered = useMemo(() => {
+    return problems.filter((p) => {
+      const matchesSearch =
+        !search ||
+        p.title.toLowerCase().includes(search.toLowerCase()) ||
+        p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+      const matchesDifficulty = selectedDifficulty === 'ALL' || p.difficulty === selectedDifficulty;
+      const matchesTags =
+        selectedTags.length === 0 || selectedTags.some((tag) => p.tags.includes(tag as ProblemTag));
+      return matchesSearch && matchesDifficulty && matchesTags;
+    });
+  }, [problems, search, selectedDifficulty, selectedTags]);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
 
   if (isLoading) {
     return (
@@ -39,7 +53,7 @@ export function ProblemList({ problems, isLoading, onProblemClick }: ProblemList
 
   return (
     <div className="space-y-4">
-      {/* Search & Filters */}
+      {/* Search & Difficulty Filter */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
@@ -72,6 +86,42 @@ export function ProblemList({ problems, isLoading, onProblemClick }: ProblemList
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Tag Filter */}
+      {availableTags.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <Tag className="h-3.5 w-3.5 shrink-0 text-text-muted" />
+          {availableTags.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => toggleTag(tag)}
+              className={cn(
+                'shrink-0 rounded-md border px-2.5 py-1 text-xs font-medium transition-all duration-150',
+                selectedTags.includes(tag)
+                  ? 'border-primary/30 bg-primary/10 text-primary'
+                  : 'border-border bg-surface/50 text-text-muted hover:text-text-secondary hover:border-border-hover'
+              )}
+            >
+              {tag}
+            </button>
+          ))}
+          {selectedTags.length > 0 && (
+            <button
+              onClick={() => setSelectedTags([])}
+              className="shrink-0 text-xs text-text-muted hover:text-text-secondary transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Results count */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-text-muted">
+          {filtered.length} of {problems.length} problems
+        </p>
       </div>
 
       {/* Problem List */}

@@ -16,7 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { AnimatedPage } from '@/components/common/AnimatedPage';
 import { DashboardCard } from '@/components/features/dashboard';
-import { DifficultyBadge } from '@/components/features/problems/DifficultyBadge';
+import { DifficultyBadge } from '@/components/features/problems';
 import { cn } from '@/lib/utils';
 import { ROUTE_PATHS } from '@/routes/paths';
 
